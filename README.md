@@ -1,2 +1,1 @@
-# mobile_full_stack
-Repository for a mobile full stack application
+# Aplicação móvel com API rest ful e integração com viaCEP
