@@ -84,7 +84,11 @@ export default function FormScreen({ navigation, route }: Props) {
         };
         await createStudent(payload);
       }
-      navigation.goBack();
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.navigate('Students');
+      }
     } catch (e: any) {
       const status = e?.response?.status;
       const backendMsg = e?.response?.data?.message;
