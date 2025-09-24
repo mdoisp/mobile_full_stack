@@ -5,6 +5,7 @@ import ListScreen from './src/screens/ListScreen';
 import FormScreen from './src/screens/FormScreen';
 import ViewScreen from './src/screens/ViewScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { TouchableOpacity, Text } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -12,9 +13,20 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="Students" component={ListScreen} />
-          <Stack.Screen name="StudentForm" component={FormScreen} options={{ title: 'Novo Estudante' }} />
+        <Stack.Navigator initialRouteName="StudentForm">
+          <Stack.Screen name="Students" component={ListScreen} options={{ title: 'Lista de Estudantes' }} />
+          <Stack.Screen
+            name="StudentForm"
+            component={FormScreen}
+            options={({ navigation }) => ({
+              title: 'Cadastro de Estudante',
+              headerRight: () => (
+                <TouchableOpacity onPress={() => navigation.navigate('Students')} style={{ paddingHorizontal: 8 }}>
+                  <Text style={{ color: '#0a7', fontWeight: '700' }}>Exibir lista</Text>
+                </TouchableOpacity>
+              ),
+            })}
+          />
           <Stack.Screen name="StudentView" component={ViewScreen} options={{ title: 'Detalhes' }} />
         </Stack.Navigator>
         <StatusBar style="auto" />

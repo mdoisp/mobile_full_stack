@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { fetchStudents, deleteStudent, StudentDTO } from '@/api/client';
 
@@ -15,6 +16,7 @@ export default function ListScreen({ navigation }: Props) {
   const [students, setStudents] = useState<StudentDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const load = useCallback(async () => {
     try {
@@ -22,7 +24,8 @@ export default function ListScreen({ navigation }: Props) {
       const data = await fetchStudents();
       setStudents(data);
     } catch (e) {
-      Alert.alert('Erro', 'Falha ao carregar estudantes');
+      // Evita pop-up chato quando abrir sem conexão ou sem dados
+      console.warn('Falha ao carregar estudantes');
     } finally {
       setLoading(false);
     }
@@ -92,11 +95,11 @@ export default function ListScreen({ navigation }: Props) {
         data={students}
         keyExtractor={(item) => item._id ?? item.studentId}
         renderItem={renderItem}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 120 + insets.bottom }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 32 }}>Nenhum estudante.</Text>}
       />
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('StudentForm')}>
+      <TouchableOpacity style={[styles.fab, { bottom: 24 + insets.bottom }]} onPress={() => navigation.navigate('StudentForm')}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
     </View>

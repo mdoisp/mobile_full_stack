@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import axios from 'axios';
 import { createStudent, updateStudent, StudentDTO } from '@/api/client';
@@ -13,6 +14,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'StudentForm'>;
 
 export default function FormScreen({ navigation, route }: Props) {
   const editing = Boolean(route.params?.existing);
+  const insets = useSafeAreaInsets();
   const [form, setForm] = useState<StudentDTO>(
     route.params?.existing ?? {
       studentId: '',
@@ -67,11 +69,25 @@ export default function FormScreen({ navigation, route }: Props) {
         const { _id, ...payload } = form;
         await updateStudent(_id, payload as StudentDTO);
       } else {
-        await createStudent(form);
+        // Garante tipos/campos do payload conforme o Schema
+        const payload: StudentDTO = {
+          studentId: form.studentId.trim(),
+          name: form.name.trim(),
+          address: {
+            zipcode: form.address.zipcode.trim(),
+            street: form.address.street.trim(),
+            neighborhood: form.address.neighborhood.trim(),
+            city: form.address.city.trim(),
+            state: form.address.state.trim(),
+          },
+          courses: (form.courses || []).map((c) => c.trim()).filter(Boolean),
+        };
+        await createStudent(payload);
       }
       navigation.goBack();
-    } catch (e) {
-      Alert.alert('Erro', 'Não foi possível salvar.');
+    } catch (e: any) {
+      const msg = e?.response?.data?.message || e?.message || 'Não foi possível salvar.';
+      Alert.alert('Erro', msg);
     }
   };
 
@@ -102,7 +118,7 @@ export default function FormScreen({ navigation, route }: Props) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 24 + insets.bottom }]}>
       <Text style={styles.title}>{editing ? 'Editar estudante' : 'Novo estudante'}</Text>
 
       <Text style={styles.label}>RA / studentId</Text>
@@ -134,7 +150,7 @@ export default function FormScreen({ navigation, route }: Props) {
       <Text style={[styles.label, { marginTop: 16 }]}>Cursos (separados por vírgula)</Text>
       <TextInput style={styles.input} value={coursesInput} onChangeText={setCoursesInput} onBlur={onBlurCourses} placeholder="Ex.: Matemática, Inglês" />
 
-      <TouchableOpacity style={[styles.btn, { marginTop: 24, backgroundColor: canSubmit ? '#0a7' : '#aaa' }]} onPress={handleSubmit} disabled={!canSubmit}>
+      <TouchableOpacity style={[styles.btn, { marginTop: 24, marginBottom: insets.bottom, backgroundColor: canSubmit ? '#0a7' : '#aaa' }]} onPress={handleSubmit} disabled={!canSubmit}>
         <Text style={styles.btnText}>{editing ? 'Salvar alterações' : 'Adicionar'}</Text>
       </TouchableOpacity>
     </ScrollView>

@@ -1,14 +1,19 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
 
-const apiBaseUrl: string | undefined = Constants.expoConfig?.extra?.apiBaseUrl;
+// Resolve extras tanto em dev (Expo Go) quanto em build
+const extras: any = (Constants.expoConfig?.extra as any)
+  ?? (Constants as any).manifestExtra
+  ?? (Constants as any).manifest?.extra;
+
+const apiBaseUrl: string | undefined = extras?.apiBaseUrl || process.env.EXPO_PUBLIC_API_BASE_URL;
 
 if (!apiBaseUrl) {
-  console.warn('apiBaseUrl não definido em app.json > expo.extra.apiBaseUrl');
+  console.error('apiBaseUrl não definido. Configure em app.json (expo.extra.apiBaseUrl) ou EXPO_PUBLIC_API_BASE_URL');
 }
 
 export const api = axios.create({
-  baseURL: apiBaseUrl || 'http://localhost:3000',
+  baseURL: apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
