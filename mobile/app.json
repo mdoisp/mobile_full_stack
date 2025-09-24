@@ -3,7 +3,7 @@
     "name": "mobile",
     "slug": "mobile",
     "extra": {
-      "apiBaseUrl": "http://192.168.1.99:3000"
+      "apiBaseUrl": "https://student-backend-2ed1.onrender.com/"
     },
     "plugins": [
       [
