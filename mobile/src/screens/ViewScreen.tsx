@@ -20,7 +20,7 @@ export default function ViewScreen({ route }: Props) {
       <Text style={styles.item}>Rua: {student.address.street}</Text>
       <Text style={styles.item}>Bairro: {student.address.neighborhood}</Text>
       <Text style={styles.item}>Cidade: {student.address.city} - {student.address.state}</Text>
-      <Text style={[styles.item, { marginTop: 12 }]}>Cursos: {student.courses?.join(', ') || '-'}</Text>
+      <Text style={[styles.item, { marginTop: 12 }]}>Courses: {student.courses?.join(', ') || '-'}</Text>
     </View>
   );
 }

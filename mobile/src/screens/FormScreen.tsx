@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, StyleSheet 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import axios from 'axios';
-import { createStudent, updateStudent, StudentDTO } from '@/api/client';
+import { createStudent, updateStudent, StudentDTO, api } from '@/api/client';
 
 type RootStackParamList = {
   Students: undefined;
@@ -39,13 +39,13 @@ export default function FormScreen({ navigation, route }: Props) {
   const handleViaCep = async () => {
     const cep = form.address.zipcode.replace(/\D/g, '');
     if (cep.length !== 8) {
-      Alert.alert('CEP inválido', 'Informe um CEP com 8 dígitos.');
+      Alert.alert('Invalid CEP', 'Enter an 8-digit CEP.');
       return;
     }
     try {
       const { data } = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
       if (data.erro) {
-        Alert.alert('CEP não encontrado');
+        Alert.alert('CEP not found');
         return;
       }
       setForm((prev) => ({
@@ -59,7 +59,7 @@ export default function FormScreen({ navigation, route }: Props) {
         },
       }));
     } catch (e) {
-      Alert.alert('Erro', 'Falha ao consultar o viaCEP');
+      Alert.alert('Error', 'Failed to query viaCEP');
     }
   };
 
@@ -86,8 +86,22 @@ export default function FormScreen({ navigation, route }: Props) {
       }
       navigation.goBack();
     } catch (e: any) {
-      const msg = e?.response?.data?.message || e?.message || 'Não foi possível salvar.';
-      Alert.alert('Erro', msg);
+      const status = e?.response?.status;
+      const backendMsg = e?.response?.data?.message;
+      const msg = backendMsg || e?.message || 'Não foi possível salvar.';
+      Alert.alert('Save failed', `${msg}${status ? ` (HTTP ${status})` : ''}`);
+    }
+  };
+
+  const handlePing = async () => {
+    try {
+      const { data } = await api.get('/');
+      Alert.alert('Success', typeof data === 'string' ? data : 'API OK');
+    } catch (e: any) {
+      const status = e?.response?.status;
+      const backendMsg = e?.response?.data?.message;
+      const msg = backendMsg || e?.message || 'Failed to connect';
+      Alert.alert('Connection error', `${msg}${status ? ` (HTTP ${status})` : ''}`);
     }
   };
 
@@ -119,13 +133,16 @@ export default function FormScreen({ navigation, route }: Props) {
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 24 + insets.bottom }]}>
-      <Text style={styles.title}>{editing ? 'Editar estudante' : 'Novo estudante'}</Text>
+      <Text style={styles.title}>{editing ? 'Edit student' : 'New student'}</Text>
+      <TouchableOpacity onPress={handlePing} style={[styles.btn, { backgroundColor: '#555', alignSelf: 'flex-start', marginBottom: 12 }]}>
+        <Text style={styles.btnText}>Test connection</Text>
+      </TouchableOpacity>
 
       <Text style={styles.label}>RA / studentId</Text>
       <TextInput style={styles.input} value={form.studentId} onChangeText={(t) => updateField('studentId', t)} placeholder="Ex.: 20250001" />
 
-      <Text style={styles.label}>Nome</Text>
-      <TextInput style={styles.input} value={form.name} onChangeText={(t) => updateField('name', t)} placeholder="Nome completo" />
+      <Text style={styles.label}>Name</Text>
+      <TextInput style={styles.input} value={form.name} onChangeText={(t) => updateField('name', t)} placeholder="Full name" />
 
       <Text style={[styles.label, { marginTop: 16 }]}>CEP</Text>
       <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -135,23 +152,23 @@ export default function FormScreen({ navigation, route }: Props) {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.label}>Rua</Text>
+      <Text style={styles.label}>Street</Text>
       <TextInput style={styles.input} value={form.address.street} onChangeText={(t) => updateField('address.street', t)} />
 
-      <Text style={styles.label}>Bairro</Text>
+      <Text style={styles.label}>Neighborhood</Text>
       <TextInput style={styles.input} value={form.address.neighborhood} onChangeText={(t) => updateField('address.neighborhood', t)} />
 
-      <Text style={styles.label}>Cidade</Text>
+      <Text style={styles.label}>City</Text>
       <TextInput style={styles.input} value={form.address.city} onChangeText={(t) => updateField('address.city', t)} />
 
-      <Text style={styles.label}>Estado</Text>
+      <Text style={styles.label}>State</Text>
       <TextInput style={styles.input} value={form.address.state} onChangeText={(t) => updateField('address.state', t)} />
 
-      <Text style={[styles.label, { marginTop: 16 }]}>Cursos (separados por vírgula)</Text>
-      <TextInput style={styles.input} value={coursesInput} onChangeText={setCoursesInput} onBlur={onBlurCourses} placeholder="Ex.: Matemática, Inglês" />
+      <Text style={[styles.label, { marginTop: 16 }]}>Courses (comma-separated)</Text>
+      <TextInput style={styles.input} value={coursesInput} onChangeText={setCoursesInput} onBlur={onBlurCourses} placeholder="e.g., Math, English" />
 
       <TouchableOpacity style={[styles.btn, { marginTop: 24, marginBottom: insets.bottom, backgroundColor: canSubmit ? '#0a7' : '#aaa' }]} onPress={handleSubmit} disabled={!canSubmit}>
-        <Text style={styles.btnText}>{editing ? 'Salvar alterações' : 'Adicionar'}</Text>
+        <Text style={styles.btnText}>{editing ? 'Save changes' : 'Add'}</Text>
       </TouchableOpacity>
     </ScrollView>
   );

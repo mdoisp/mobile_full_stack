@@ -24,8 +24,8 @@ export default function ListScreen({ navigation }: Props) {
       const data = await fetchStudents();
       setStudents(data);
     } catch (e) {
-      // Evita pop-up chato quando abrir sem conexão ou sem dados
-      console.warn('Falha ao carregar estudantes');
+      // Avoid intrusive popup on first load
+      console.warn('Failed to load students');
     } finally {
       setLoading(false);
     }
@@ -43,17 +43,17 @@ export default function ListScreen({ navigation }: Props) {
   }, [load]);
 
   const handleDelete = (item: StudentDTO) => {
-    Alert.alert('Confirmar', `Excluir ${item.name}?`, [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert('Confirm', `Delete ${item.name}?`, [
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Excluir',
+        text: 'Delete',
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteStudent(item._id!);
             await load();
           } catch (e) {
-            Alert.alert('Erro', 'Não foi possível excluir.');
+            Alert.alert('Error', 'Unable to delete.');
           }
         },
       },
@@ -69,13 +69,13 @@ export default function ListScreen({ navigation }: Props) {
       </View>
       <View style={styles.actions}>
         <TouchableOpacity onPress={() => navigation.navigate('StudentView', { student: item })}>
-          <Text style={styles.link}>Ver</Text>
+          <Text style={styles.link}>View</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('StudentForm', { existing: item })}>
-          <Text style={styles.link}>Editar</Text>
+          <Text style={styles.link}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleDelete(item)}>
-          <Text style={[styles.link, { color: '#d00' }]}>Excluir</Text>
+          <Text style={[styles.link, { color: '#d00' }]}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -97,7 +97,7 @@ export default function ListScreen({ navigation }: Props) {
         renderItem={renderItem}
         contentContainerStyle={{ padding: 16, paddingBottom: 120 + insets.bottom }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 32 }}>Nenhum estudante.</Text>}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 32 }}>No students yet.</Text>}
       />
       <TouchableOpacity style={[styles.fab, { bottom: 24 + insets.bottom }]} onPress={() => navigation.navigate('StudentForm')}>
         <Text style={styles.fabText}>+</Text>

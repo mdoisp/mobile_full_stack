@@ -14,7 +14,19 @@ export const createStudent = async (req: Request, res: Response) => {
     const savedStudent = await newStudent.save();
     res.status(201).json(savedStudent);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating student', error: error });
+    // Erro de índice único (duplicidade)
+    // @ts-ignore
+    if ((error as any)?.code === 11000) {
+      return res.status(409).json({ message: 'studentId already exists', error });
+    }
+    // Erros de validação do Mongoose
+    // @ts-ignore
+    if ((error as any)?.name === 'ValidationError') {
+      // @ts-ignore
+      const messages = Object.values((error as any).errors).map((e: any) => e.message);
+      return res.status(400).json({ message: 'Invalid data', details: messages });
+    }
+    res.status(500).json({ message: 'Error creating student', error: String(error) });
   }
 };
 
@@ -42,7 +54,7 @@ export const updateStudent = async (req: Request, res: Response) => {
       );
   
       if (!updatedStudent) {
-        return res.status(404).json({ message: 'Student not found' });
+      return res.status(404).json({ message: 'Student not found' });
       }
   
       res.status(200).json(updatedStudent);
@@ -61,7 +73,7 @@ export const deleteStudent = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Student not found' });
         }
         
-        res.status(200).json({ message: 'Succefully deleting student' });
+        res.status(200).json({ message: 'Successfully deleted student' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting student', error: error });
     }

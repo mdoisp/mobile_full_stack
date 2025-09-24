@@ -18,16 +18,16 @@ if (!databaseUrl) {
 }
 
 mongoose.connect(databaseUrl).then(() => {
-    console.log('Succefully connected to MongoDB ☘️')
+    console.log('Successfully connected to MongoDB ☘️')
 })
 .catch((err) => {
-    console.error('MongoDB connection failure: ', err)
+    console.error('MongoDB connection failure:', err)
 })
 
 app.use('/students', studentRouter);
 
 app.get('/', (req, res) => {
-    res.send ('Server working correctly');
+    res.send('Server working correctly');
 })
 
 app.listen(PORT, () => {

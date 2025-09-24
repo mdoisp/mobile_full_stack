@@ -14,20 +14,20 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="StudentForm">
-          <Stack.Screen name="Students" component={ListScreen} options={{ title: 'Lista de Estudantes' }} />
+          <Stack.Screen name="Students" component={ListScreen} options={{ title: 'Students' }} />
           <Stack.Screen
             name="StudentForm"
             component={FormScreen}
             options={({ navigation }) => ({
-              title: 'Cadastro de Estudante',
+              title: 'New student',
               headerRight: () => (
                 <TouchableOpacity onPress={() => navigation.navigate('Students')} style={{ paddingHorizontal: 8 }}>
-                  <Text style={{ color: '#0a7', fontWeight: '700' }}>Exibir lista</Text>
+                  <Text style={{ color: '#0a7', fontWeight: '700' }}>Show list</Text>
                 </TouchableOpacity>
               ),
             })}
           />
-          <Stack.Screen name="StudentView" component={ViewScreen} options={{ title: 'Detalhes' }} />
+          <Stack.Screen name="StudentView" component={ViewScreen} options={{ title: 'Details' }} />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>
